@@ -8,92 +8,12 @@ vars:
   DRY: ""
 
 tasks:
+
+  todo:
+    - echo todo
  
-  python:
-    desc: setup python with miniconda
-    vars:
-      VERSION: "py312_24.5.0-0"
-      SUFFIX:
-         sh: |
-             case "{{.OS}}-{{.ARCH}}" in
-              linux-amd64) echo "Miniconda3-{{.VERSION}}-Linux-x86_64.sh" ;;
-              linux-arm64) echo "Miniconda3-{{.VERSION}}-Linux-aarch64.sh" ;;
-              darwin-amd64) echo "Miniconda3-{{.VERSION}}-MacOSX-x86_64.sh" ;;
-              darwin-arm64) echo "Miniconda3-{{.VERSION}}-MacOSX-arm64.sh" ;;
-              windows-*) echo "Miniconda3-{{.VERSION}}-Windows-x64_64.exe" ;;
-              *) echo "unknown" ;;
-             esac
-      URL: "https://repo.anaconda.com/miniconda/{{.SUFFIX}}"
-      FILE: "{{base .URL}}"
-    cmds:
-    - echo "({{.OS}}-{{.ARCH}}) {{.URL}}"
-    - curl -sL "{{.URL}}"  -o "{{.FILE}}"
-    - executable "{{.FILE}}"
-    - "./{{.FILE}} -b -f -p ~/.ops/miniconda3"
-    - ln -sf $HOME/.ops/miniconda3/bin/python python
-    - rm "{{.FILE}}"
-    - |
-      if ! rg 'mininconda3/bin' ~/.bashrc
-      then echo 'export PATH="$HOME/.ops/miniconda3/bin:$PATH"' >>~/.bashrc
-      fi
-
-  python-ipython:
-    vars:
-      NAME: ipython
-      VERSION: 8.31.0+1
-      VERSION1: 1.0.1
-    cmds:
-    - python -m pip install {{.NAME}}=={{splitList  "+" .VERSION | first}} python-dotenv=={{.VERSION1}}
-    - python -m IPython profile create
-    - |
-      cat <<EOF >~/.ipython/profile_default/startup/00-startup.ipy
-      %load_ext autoreload
-      %autoreload 2
-      from dotenv import load_dotenv
-      load_dotenv(".env")
-      load_dotenv("tests/.env", override=True)
-      EOF
-    - empty {{.TASK}}
-
-  python-prompt-toolkit:
-    vars:
-      NAME: prompt_toolkit
-      VERSION: 3.0.48
-    cmds:
-    - python -m pip install {{.NAME}}=={{.VERSION}}
-    - empty {{.TASK}}
-
-  python-pytest:
-    vars:
-      NAME: pytest
-      VERSION: 8.3.4
-    cmds:
-    - python -m pip install {{.NAME}}=={{.VERSION}}
-    - empty {{.TASK}}
-
-  python-runtime-requirements:
-    vars:
-      VERSION: 2501172243
-    cmds:
-    - python -m pip install -r https://raw.githubusercontent.com/apache/openserverless-runtimes/refs/tags/{{.VERSION}}/runtime/python/v3.12/requirements.txt
-    - empty {{.TASK}}
-
-  python-ipdb:
-    vars:
-      NAME: ipdb
-      VERSION: 0.13.1
-    cmds:
-    - python -m pip install {{.NAME}}=={{.VERSION}}
-    - empty {{.TASK}}
-
-  python-mudf:
-    vars:
-      NAME: pymupdf
-      VERSION: 1.25.3
-    cmds:
-    - python -m pip install {{.NAME}}=={{.VERSION}}
-    - empty {{.TASK}}
-
+  all:
+    - echo todo
 
   test:
     vars:

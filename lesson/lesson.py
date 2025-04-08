@@ -2,7 +2,7 @@ import sys, os
 import yaml, requests
 import os.path
 
-BASE = "https://raw.githubusercontent.com/mastrogpt/mastrogpt-training/refs/heads/main"
+BASE = "https://raw.githubusercontent.com/mastrogpt/agent41-training/refs/heads/main"
 
 def lessons():
     # download a file at BASE+/lessons assuming it is in yaml format

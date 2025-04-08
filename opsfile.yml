@@ -1,139 +1,31 @@
 version: 3
 
 tasks:
-
-  cli:
-    silent: true
-    desc: python repl
-    cmds:
-    - |
-      cd $OPS_PWD
-      set -a
-      test -e $OPS_PWD/.env && source $OPS_PWD/.env
-      test -e $OPS_PWD/.testenv && source $OPS_PWD/.testenv
-      python -m IPython
   
-  chat:
-    desc: chat with the AI (LLama3)
-    silent: true
+  cli:
+    desc: cli
+    env:
+      IPYTHONDIR:
+        sh: realpath .
+    dir: cli
     cmds:
-    - |
-      set -a
-      test -e $OPS_PWD/.env && source $OPS_PWD/.env
-      args={{._args_}}
-      set -- ${args[@]}
-      test "$1" = "--" && shift
-      python chat.py {{._action_}} "$@"
+      - uv run ipython
 
   lesson:
-    desc: lessons
+    desc: lesson management
     silent: true
+    dir: lesson
     cmds:
     - |
       if test -n "{{._name_}}"
       then
          if {{.__solution}}
-         then python lessons.py solution {{._name_}}
-         else python lessons.py lesson {{._name_}}
+         then uv run -- python lesson.py solution {{._name_}}
+         else uv run -- python lesson.py lesson {{._name_}}
          fi
       else
-        python lessons.py list
+        uv run -- python lesson.py list
       fi
 
-  stream:
-    silent: true
-    desc: stream an action
-    cmds:
-      - |
-        args={{._args_}}
-        set -- ${args[@]}
-        test "$1" = "--" && shift
-        python stream.py {{._action_}} "$@"
-
-  user:
-    silent: true
-    desc: stream an action
-    cmds:
-      - |
-        if {{.add}} 
-        then python user.py add {{._user_}}
-        elif {{.delete}} 
-        then python user.py delete {{._user_}}
-        elif {{.update}} 
-        then python user.py update {{._user_}}
-        fi
-
-  new:
-    silent: true
-    desc: generate a new python action
-    env:
-       ACTION: "{{._action_}}"
-       PACKAGE: "{{or ._package_ ._action_}}"
-       DIR:  "packages/{{or ._package_ ._action_}}/{{._action_}}"
-       FILE: "packages/{{or ._package_ ._action_}}/{{._action_}}/{{._action_}}.py"
-    cmds:
-    - test ! -e "$OPS_PWD/$FILE" || die "file already exists"
-    - |
-      mkdir -p $OPS_PWD/tests/$PACKAGE
-      mkdir -p $OPS_PWD/$DIR
-    - |
-      cat <<EOF >$OPS_PWD/$FILE
-      def $ACTION(args):
-        return { "output": "$ACTION" }
-      EOF
-    - |
-      cat <<EOF >$OPS_PWD/$DIR/__main__.py
-      #--kind python:default
-      #--web true
-      import $ACTION
-      def main(args):
-        return { "body": $ACTION.$ACTION(args) }
-      EOF
-    - |
-      cat <<EOF >$OPS_PWD/tests/$PACKAGE/test_${ACTION}.py
-      import sys 
-      sys.path.append("$DIR")
-      import $ACTION
-      
-      def test_$ACTION():
-          res = $ACTION.$ACTION({})
-          assert res["output"] == "$ACTION"
-      EOF
-    - |
-      cat <<EOF >$OPS_PWD/tests/$PACKAGE/test_${ACTION}_int.py
-      import os, requests as req
-      def test_$ACTION():
-          url = os.environ.get("OPSDEV_HOST") + "/api/my/$PACKAGE/$ACTION"
-          res = req.get(url).json()
-          assert res.get("output") == "$ACTION"
-      EOF
-
-  loader:
-    silent: true
-    desc: export a pdf to text
-    cmds:
-     - |
-       if {{.__clean}}
-       then ops invoke {{.__action}} -p "input" '!!{{.__collection}}' | jq -r .body.output
-       fi
-     - |
-        args={{._file_}} 
-        set -- ${args[@]}
-        script="$(realpath loader.py)"
-        cd $OPS_PWD
-        #if test -z {{.__action}}
-        #then python "$script" - {{.__pages}} "$@"
-        #else python "$script" {{.__action}} {{.__pages}} "$@"
-        #fi
-        python "$script" {{default "-" .__action}} {{default "4000" .__chunksize}} {{default "default" .__collection}} "{{.__opts}}" "$@"
-
-  run:
-    silent: false
-    cmds:
-    - |
-      args={{._args_}} 
-      set -- ${args[@]}
-      cd $OPS_PWD
-      python "{{._script_}}" "$@"
 
   
