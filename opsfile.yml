@@ -27,5 +27,10 @@ tasks:
         uv run -- python lesson.py list
       fi
 
+  dev:
+    silent: true
+    dir: $OPS_PWD/site
+    cmds:
+      - hugo server
 
   
