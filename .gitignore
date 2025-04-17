@@ -5,3 +5,4 @@ cli/profile_default/log
 cli/profile_default/pid
 cli/profile_default/security
 cli/profile_default/history.sqlite
+cli/profile_default/db/
