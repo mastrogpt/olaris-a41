@@ -2,7 +2,6 @@ import sys, os, json
 import requests as req
 from urllib.parse import urlparse, urlunparse
 
-
 def main(argv):
     #print(argv)
     #argv=['stream/demo']

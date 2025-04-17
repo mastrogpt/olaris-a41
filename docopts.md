@@ -8,6 +8,7 @@ AI tasks to generate code.
 Usage:
   a41 lesson [<name>] [--solution]
   a41 cli
-  a41 dev
+  a41 mcp <package>
+  a41 mcpdev <package> [--inspect]
 ```
 

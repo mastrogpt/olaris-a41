@@ -27,10 +27,28 @@ tasks:
         uv run -- python lesson.py list
       fi
 
-  dev:
+  mcp:
+    desc: mcp
+    dir: mcproxy
+    interactive: true
     silent: true
-    dir: $OPS_PWD/site
     cmds:
-      - hugo server
+      - uv python install 3.12
+      - uv venv --python 3.12
+      - uv run python generator.py {{._package_}}
+      - uv run mcp run _svr/{{._package_}}.py
 
-  
+  mcpdev:
+    desc: "mcp dev mode: generate and optionally inspect"
+    dir: mcproxy
+    interactive: true
+    silent: true
+    cmds:
+      - uv python install 3.12
+      - uv venv --python 3.12
+      - uv run python generator.py {{._package_}}
+      - |
+        if {{.__inspect}}
+        then uv run mcp dev _svr/{{._package_}}.py
+        else echo "Generated " "$(realpath _svr/{{._package_}}.py)"
+        fi
