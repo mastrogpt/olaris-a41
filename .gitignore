@@ -1,4 +1,5 @@
 __pycache__
+_svr
 .venv
 cli/profile_default/log
 cli/profile_default/pid
