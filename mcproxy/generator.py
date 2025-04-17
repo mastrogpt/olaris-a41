@@ -105,15 +105,21 @@ def generate(types, package):
             #(key, annotations) = items[0]
             # Get annotation type
             mcp_type = annotations.get('mcp:type')
+            res_to_out = "out = res"
+            result_type = "Dict"
             
             # Determine decorator
             if mcp_type == 'tool':
                 decorator = '@mcp.tool('
             elif mcp_type == 'prompt':
                 decorator = '@mcp.prompt('
+                res_to_out = "out = res.get('output', 'no output')"
+                result_type = "str"
             elif mcp_type == 'resource':
                 resource_value = annotations.get('mcp:resource', '')
                 decorator = f'@mcp.resource("{resource_value}",'
+                res_to_out = "out = res.get('output', 'no output')"
+                result_type = "str"
             else:
                 continue
 
@@ -134,14 +140,16 @@ def generate(types, package):
             
             # Write function
             f.write(f'{decorator} description="{description}")\n')
-            f.write(f'def {key}({",".join(args)}) -> Dict:\n')
+            f.write(f'def {key}({",".join(args)}) -> {result_type}:\n')
             f.write('    """\n')
             f.write('    ' + '\n    '.join(docs) + '\n')
             f.write('    """\n')
             f.write('    message = {}\n')
             for arg, var in zip(args, vars):
-                f.write(f'    message["{var}"] = {var}\n')
-            f.write(f'    return invoke(PACKAGE, "{key}", message)\n\n')
+                f.write(f'    message["{var}"] = {var} or None\n')
+            f.write(f'    res = invoke(PACKAGE, "{key}", message)\n')
+            f.write(f'    {res_to_out}\n')
+            f.write(f'    return out\n\n')
         #f.write(f'mcp.run()\n')
 
 

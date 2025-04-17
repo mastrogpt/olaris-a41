@@ -58,16 +58,15 @@ def invoke(package, func, args):
 mcp = FastMCP(name=PACKAGE)
 
 @mcp.tool(description="Reverse the input text")
-def reverse_local(input: str) -> Dict:
+def reverse_local(input: str) -> str:
     """
     input is the string to reverse
     """
-    return {
-        "output": input[::-1]
-    }
+    output = input[::-1]
+    return output
 
-@mcp.resource("greet_local://{input}", description="return a greeting")
-def greet_local(input: str) -> Dict:
+@mcp.resource("lgreet://{input}", description="return a greeting")
+def greet_local(input: str) -> str:
     """
     input is the name to greet
     """
@@ -75,9 +74,10 @@ def greet_local(input: str) -> Dict:
     return f"Hello, {output}!"
 
 @mcp.prompt(description="who you are")
-def person_local(input: str) -> Dict:
+def person_local(input: str) -> str:
     """
     input is the description of the person
     """
     output = input or "a nice person"
     return f"You are {output}!"
+
