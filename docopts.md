@@ -10,5 +10,6 @@ Usage:
   a41 cli
   a41 mcp <package>
   a41 mcpdev <package> [--inspect]
+  a41 vibe
 ```
 

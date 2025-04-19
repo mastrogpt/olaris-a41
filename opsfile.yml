@@ -52,3 +52,11 @@ tasks:
         then uv run mcp dev _svr/{{._package_}}.py
         else echo "Generated " "$(realpath _svr/{{._package_}}.py)"
         fi
+
+  vibe:
+    desc: vibe
+    interactive: true
+    silent: true
+    dir: $OPS_PWD
+    cmds:
+    - claude 
