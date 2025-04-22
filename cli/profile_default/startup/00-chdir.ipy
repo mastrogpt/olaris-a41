@@ -1,0 +1,6 @@
+print("hello")
+import os
+dir = os.getenv("OPS_PWD")
+if dir:
+    print(f"Changing directory to {dir}")
+    os.chdir(dir)

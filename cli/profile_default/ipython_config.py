@@ -36,6 +36,7 @@ c = get_config()  #noqa
 #  Default: []
 # c.InteractiveShellApp.exec_lines = []
 
+
 ## A list of dotted module names of IPython extensions to load.
 #  Default: []
 # c.InteractiveShellApp.extensions = []

@@ -6,6 +6,7 @@ import traceback
 import dotenv
 import sys
 import signal
+import json
 from requests.auth import HTTPBasicAuth
 from mcp.server.fastmcp import FastMCP
 from typing import Dict
@@ -55,29 +56,11 @@ def invoke(package, func, args):
         traceback.print_exc()
         return { "error": str(e) }
 
+logfile = os.getenv("LOGFILE")
+
+def log(func, sep, msg):
+    with open(logfile, "a") as f:
+        f.write(f"{PACKAGE}/{func} {sep} {json.dumps(msg)}\n")
+
 mcp = FastMCP(name=PACKAGE)
-
-@mcp.tool(description="Reverse the input text")
-def reverse_local(input: str) -> str:
-    """
-    input is the string to reverse
-    """
-    output = input[::-1]
-    return output
-
-@mcp.resource("lgreet://{input}", description="return a greeting")
-def greet_local(input: str) -> str:
-    """
-    input is the name to greet
-    """
-    output = input or "world"
-    return f"Hello, {output}!"
-
-@mcp.prompt(description="who you are")
-def person_local(input: str) -> str:
-    """
-    input is the description of the person
-    """
-    output = input or "a nice person"
-    return f"You are {output}!"
 

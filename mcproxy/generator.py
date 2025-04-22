@@ -1,8 +1,10 @@
 import os, sys, requests
 from pathlib import Path
-
 from requests.auth import HTTPBasicAuth
     
+COMMON = Path("common.py").read_text()
+SAMPLE = Path("sample.py").read_text()
+
 APIHOST = os.getenv("OPSDEV_APIHOST")
 NAMESPACE = os.getenv("OPSDEV_USERNAME")
 AUTH = os.getenv("AUTH")
@@ -11,7 +13,6 @@ if AUTH is None:
     sys.exit(1) 
 
 ops_auth = HTTPBasicAuth(AUTH.split(":")[0], AUTH.split(":")[1])
-
 
 def call(cmd, args=None):
     url = f"{APIHOST}/api/v1/namespaces/{NAMESPACE}/{cmd}"
@@ -67,10 +68,36 @@ def extract_types(actions, package):
     return result
 
 
-COMMON = Path("common.py").read_text()
+def config(package):
+    # Get the current working directory
+    dir = os.path.abspath(os.getcwd())
+    # Create mcp folder if it doesn't exist
+    os.makedirs('_svr', exist_ok=True)
+
+    # Generate config file path
+    filepath = f'_svr/{package}.json'
+    Path(filepath).write_text(f"""{{ "mcpServers": {{
+    "{package}": {{
+      "command": "uv",
+      "args": ["--directory", "{dir}", "run", "mcp", "run", "_svr/{package}.py"]
+    }}
+  }}
+}}
+""")
 
 
-def generate(types, package):
+def extract_default(ann_value):
+    """
+    Looks for (default=XXX) in the ann_value, returns the value XXX or None if not found.
+    """
+    if not ann_value or "(default=" not in ann_value:
+        return None
+    start = ann_value.find("(default=") + len("(default=")
+    end = ann_value.find(")", start)
+    return ann_value[start:end] if end != -1 else None
+
+
+def generate(types, package, sample):
     """
     Create a folder mcp if it does not exist and generate a file mcp/<package>.py.
     Write the common code to the file then iterate over the keys of the types.
@@ -98,6 +125,9 @@ def generate(types, package):
     with open(filepath, 'w') as f:
         # Write common code
         f.write(COMMON.replace("\"common\"", f"\"{package}\""))
+
+        if sample:
+            f.write(SAMPLE)
         
         # Process each function
         items = list(types.items())
@@ -107,62 +137,78 @@ def generate(types, package):
             mcp_type = annotations.get('mcp:type')
             res_to_out = "out = res"
             result_type = "Dict"
+            description = annotations.get('mcp:desc')
             
             # Determine decorator
             if mcp_type == 'tool':
                 decorator = '@mcp.tool('
+                if description:
+                    decorator += f'description="{description}"'
+                decorator +=')\n'
             elif mcp_type == 'prompt':
                 decorator = '@mcp.prompt('
+                if description:
+                    decorator += f'description="{description}"'
+                decorator +=')\n'
                 res_to_out = "out = res.get('output', 'no output')"
                 result_type = "str"
             elif mcp_type == 'resource':
-                resource_value = annotations.get('mcp:resource', '')
-                decorator = f'@mcp.resource("{resource_value}",'
+                decorator = f'@mcp.resource("{key}://{{input}}")\n'
                 res_to_out = "out = res.get('output', 'no output')"
                 result_type = "str"
             else:
                 continue
-
-            description = annotations.get('mcp:desc', '')
                 
             # Initialize docs with description
             docs = []
+            if description:
+                docs.append(description)
+            docs.append("Args:")
             
             # Build args, vars and docs arrays
             args = []
             vars = []
             for ann_key, ann_value in annotations.items():
                 if not ann_key.startswith('mcp:'):
-                    args.append(ann_key)
                     var = ann_key.split(':')[0]
+                    default_value = extract_default(ann_value)
+                    if default_value:
+                        ann_key += f"={default_value}"
+                        args.append(ann_key)
+                    else:
+                        args.insert(0, ann_key)
                     vars.append(var)
-                    docs.append(f"{var} is {ann_value}")
+                    docs.append(f"  {var} is {ann_value}")
             
             # Write function
-            f.write(f'{decorator} description="{description}")\n')
+            f.write(decorator)
             f.write(f'def {key}({",".join(args)}) -> {result_type}:\n')
             f.write('    """\n')
             f.write('    ' + '\n    '.join(docs) + '\n')
             f.write('    """\n')
             f.write('    message = {}\n')
             for arg, var in zip(args, vars):
-                f.write(f'    message["{var}"] = {var} or None\n')
+                f.write(f'    if {var}: message["{var}"] = {var}\n')
+            f.write(f'    if logfile: log("{key}", ">>>", message)\n')
             f.write(f'    res = invoke(PACKAGE, "{key}", message)\n')
+            f.write(f'    if logfile: log("{key}", "<<<", res)\n')
             f.write(f'    {res_to_out}\n')
             f.write(f'    return out\n\n')
-        #f.write(f'mcp.run()\n')
+        #f.write(f'print("Starting", PACKAGE)\n')
+        #f.write(f"mcp.run(transport='sse')\n")
 
-
-def main(package):
+def main(package, sample):
     # Get all actions
     
     types = extract_types(call("actions"), package)
-    generate(types, package)
+    generate(types, package, sample)
+    config(package)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Usage: generator.py <package>")
-        package = "hello41"
         sys.exit(1)
 
-    main(sys.argv[1])
+    sample = len(sys.argv) > 2 and sys.argv[2] == "true"
+
+    main(sys.argv[1], sample)

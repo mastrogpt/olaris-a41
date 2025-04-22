@@ -27,31 +27,75 @@ tasks:
         uv run -- python lesson.py list
       fi
 
+  _config:
+    desc: config
+    dir: 
+    cmds:
+      - |
+        cat <<EOF >mcpconfig.json
+        {
+          "mcpServers": {
+            "{{._package_}}": {
+              "command": "uv",
+              "args": ["@modelcontextprotocol/server-everything"],
+              "env": {
+                "hello": "Hello MCP!"
+              }
+            },
+        }
+        EOF
+
   mcp:
     desc: mcp
     dir: mcproxy
     interactive: true
     silent: true
+    env:
+    #  FASTMCP_PORT: 3001
+      PYTHONUBUFFERED: 1
     cmds:
       - uv python install 3.12
-      - uv venv --python 3.12
+      - if ! test -d .venv ; then uv venv --python 3.12 ; fi
       - uv run python generator.py {{._package_}}
-      - uv run mcp run _svr/{{._package_}}.py
+      - uv run --with mcp mcp run "$(realpath _svr/{{._package_}}.py)"
 
-  mcpdev:
-    desc: "mcp dev mode: generate and optionally inspect"
+  mcptest:
+    desc: "mcp test: test a generated mcp server"
     dir: mcproxy
     interactive: true
     silent: true
     cmds:
       - uv python install 3.12
-      - uv venv --python 3.12
-      - uv run python generator.py {{._package_}}
+      - if ! test -d .venv ; then uv venv --python 3.12 ; fi
+      - uv run python generator.py {{._package_}} {{.__sample}}
+      - echo "Generated " "$(realpath _svr/{{._package_}}.py)"
+      - echo "Config    " "$(realpath _svr/{{._package_}}.json)"
       - |
-        if {{.__inspect}}
-        then uv run mcp dev _svr/{{._package_}}.py
-        else echo "Generated " "$(realpath _svr/{{._package_}}.py)"
+        if ! {{.__norun}}
+        then bun x @wong2/mcp-cli --config "_svr/{{._package_}}.json"
         fi
+
+  new:
+    desc: new tool
+    dir: new
+    interactive: true
+    silent: true
+    cmds:
+      - |
+        if test -n "{{.__tool}}"
+        then TYPE="tool" ; NAME="{{.__tool}}"
+        elif test -n "{{.__resource}}"
+        then TYPE="resource" ; NAME="{{.__resource}}"
+        elif test -n "{{.__prompt}}"
+        then TYPE="prompt" ; NAME="{{.__prompt}}"
+        elif test -n "{{.__clean}}"
+        then TYPE="clean" ; NAME="{{.__clean}}"
+        fi
+        if test -n "$TYPE"
+        then uv run python main.py "$TYPE" "{{._package_}}" "$NAME" "{{._description_}}"
+        else echo "Please specify --tool, --resource or --prompt"
+        fi
+
 
   vibe:
     desc: vibe
