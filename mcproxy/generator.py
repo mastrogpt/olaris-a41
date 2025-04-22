@@ -128,7 +128,8 @@ def generate(types, package, sample):
 
         if sample:
             f.write(SAMPLE)
-        
+
+
         # Process each function
         items = list(types.items())
         for key, annotations in items:
@@ -139,6 +140,22 @@ def generate(types, package, sample):
             result_type = "Dict"
             description = annotations.get('mcp:desc')
             
+            # Build args, vars and docs arrays
+            docs = ["Args:"]
+            args = []
+            vars = []
+            for ann_key, ann_value in annotations.items():
+                if not ann_key.startswith('mcp:'):
+                    var = ann_key.split(':')[0]
+                    default_value = extract_default(ann_value)
+                    if default_value:
+                        ann_key += f"={default_value}"
+                        args.append(ann_key)
+                    else:
+                        args.insert(0, ann_key)
+                    vars.append(var)
+                    docs.append(f"  {var} is {ann_value}")
+
             # Determine decorator
             if mcp_type == 'tool':
                 decorator = '@mcp.tool('
@@ -153,32 +170,15 @@ def generate(types, package, sample):
                 res_to_out = "out = res.get('output', 'no output')"
                 result_type = "str"
             elif mcp_type == 'resource':
-                decorator = f'@mcp.resource("{key}://{{input}}")\n'
+                decorator = f'@mcp.resource("{key}://{{{vars[0]}}}")\n'
                 res_to_out = "out = res.get('output', 'no output')"
                 result_type = "str"
             else:
                 continue
                 
-            # Initialize docs with description
-            docs = []
             if description:
-                docs.append(description)
-            docs.append("Args:")
+                docs.insert(0,description)
             
-            # Build args, vars and docs arrays
-            args = []
-            vars = []
-            for ann_key, ann_value in annotations.items():
-                if not ann_key.startswith('mcp:'):
-                    var = ann_key.split(':')[0]
-                    default_value = extract_default(ann_value)
-                    if default_value:
-                        ann_key += f"={default_value}"
-                        args.append(ann_key)
-                    else:
-                        args.insert(0, ann_key)
-                    vars.append(var)
-                    docs.append(f"  {var} is {ann_value}")
             
             # Write function
             f.write(decorator)
