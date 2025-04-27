@@ -106,7 +106,7 @@ def main(args):
     [user, secret] = args.get("token", "_:_").split(":")
     rd = redis.from_url(args.get("REDIS_URL"))
     check = rd.get(f"{{args.get("REDIS_PREFIX")}}TOKEN:{{user}}") or b''
-    if check == secret:
+    if check.decode('utf-8') == secret:
         return {{"body": {name}.{name}(args)}}
     return {{"body": "unauthorized"}}
   # CLI access
