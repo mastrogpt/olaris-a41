@@ -51,7 +51,7 @@ def invoke(package, func, args):
     try:
         res = requests.post(url, auth=ops_auth, json=args)
         out = res.json().get("response", {}).get("result", {"error": "no response"})
-        return out
+        return out.get("body", {})
     except Exception as e:
         traceback.print_exc()
         return { "error": str(e) }

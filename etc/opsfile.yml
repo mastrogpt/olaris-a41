@@ -1,0 +1,9 @@
+version: 3
+tasks:
+  vibe:
+    desc: vibe
+    interactive: true
+    silent: true
+    dir: $OPS_PWD
+    cmds:
+    - claude

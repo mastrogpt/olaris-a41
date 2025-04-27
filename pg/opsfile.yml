@@ -1,0 +1,53 @@
+version: 3
+
+tasks:
+
+  sqload:
+    desc: load a sql file for postgres
+    cmds:
+     - |
+        DIR="$(pwd)"
+        cd $OPS_PWD
+        FILE="$(realpath {{._filesql_}})"
+        uv run --directory "$DIR" python main.py "$FILE" "{{.__action}}" "{{.__size}}"
+
+
+  lite2pg:
+    desc: sqlite to postgres conversion
+    dir: $OPS_PWD
+    cmds:
+    - which pg_dump || die "pg_dump not found"
+    - which pgloader || die "pgloader not found"
+    - |
+      source $OPS_PWD/tests/.env
+      FILE="$(realpath {{._file_}})"
+      cat > {{._file_}}.load <<EOF 
+      LOAD DATABASE
+        FROM sqlite://$FILE
+        INTO $POSTGRES_URL
+
+      WITH include no drop, create tables, create indexes, reset sequences
+
+      SET search_path to '$OPSDEV_USERNAME' 
+
+      BEFORE LOAD 
+        DO \$\$ DROP SCHEMA IF EXISTS $OPSDEV_USERNAME CASCADE; \$\$
+        DO \$\$ CREATE SCHEMA IF NOT EXISTS $OPSDEV_USERNAME; \$\$
+      ;
+      EOF
+      pgloader {{._file_}}.load 
+      export PGPASSWORD=$POSTGRES_PASSWORD
+      pg_dump -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USERNAME" -d "$POSTGRES_DATABASE" -n $OPSDEV_USERNAME -F p --inserts --no-owner --no-privileges  -f  "{{._file_}}.sql"
+
+  psql:
+    desc: postgres psql command
+    dir: $OPS_PWD
+    cmds:
+    - |
+      source $OPS_PWD/tests/.env
+      export PGPASSWORD=$POSTGRES_PASSWORD
+      if test -z "{{._command_}}"
+      then psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USERNAME -d $POSTGRES_DATABASE
+      else psql -h $POSTGRES_HOST -p $POSTGRES_PORT -U $POSTGRES_USERNAME -d $POSTGRES_DATABASE -c "{{._command_}}"
+      fi
+
