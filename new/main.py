@@ -96,6 +96,8 @@ def main(typ, package, name, description, opts):
 #-a mcp:type {typ}
 #-a mcp:desc "{description}"
 #-a input:str "the user input (default='')"
+#-p REDIS_URL "$REDIS_URL"
+#-p REDIS_PREFIX "$REDIS_PREFIX"
 {annotation}
 import {name}
 
