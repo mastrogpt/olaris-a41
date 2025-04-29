@@ -131,7 +131,7 @@ import {name} as m
 
 def test_{name}():
     args = {{}}
-    result = m.{name}(args).get("body")
+    result = m.{name}(args)
     assert result["output"] == ""
     args = {{"input": "test input"}}
     result = m.{name}(args)
