@@ -79,7 +79,10 @@ def config(package):
     Path(filepath).write_text(f"""{{ "mcpServers": {{
     "{package}": {{
       "command": "uv",
-      "args": ["--directory", "{dir}", "run", "mcp", "run", "_svr/{package}.py"]
+      "args": ["--directory", "{dir}", "run", "mcp", "run", "_svr/{package}.py"],
+      "env": {{
+          "LOGFILE": "_svr/{package}.log"
+      }}
     }}
   }}
 }}

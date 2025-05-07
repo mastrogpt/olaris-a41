@@ -11,6 +11,50 @@ tasks:
         FILE="$(realpath {{._filesql_}})"
         uv run --directory "$DIR" python main.py "$FILE" "{{.__action}}" "{{.__size}}"
 
+  csv2pg:
+    desc: load a csv file for postgres
+    dir: $OPS_PWD
+    silent: true
+    cmds:
+    - which pg_dump >/dev/null || die "pg_dump not found"
+    - which pgloader >/dev/null || die "pgloader not found"
+    - echo {{._file_}} | grep -q -E '\.csv$' || die "file {{._file_}} is not a load file"
+    - |
+      source $OPS_PWD/tests/.env
+      FILE="$(realpath {{._file_}})"
+      if {{.__run}} ; then 
+            if pgloader {{._file_}}.load 
+            then 
+                export PGPASSWORD=$POSTGRES_PASSWORD
+                pg_dump -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USERNAME" -d "$POSTGRES_DATABASE" -n $OPSDEV_USERNAME -F p --inserts --no-owner --no-privileges  -f  "{{._file_}}.sql"
+                echo "Exported {{._file_}}.sql"
+            else 
+                echo "pgloader failed"
+            fi
+      else 
+      FIELDS=$(head -1 $FILE | tr -d '\r\n')
+      TFIELDS=$(echo $FIELDS, | awk -F, '{for (i=1;i<NF;i++) {printf " %s varchar(1024),", $i}}')
+      cat >{{._file_}}.load <<EOF
+      LOAD CSV
+        FROM '$FILE' WITH ENCODING 'UTF-8'
+        HAVING FIELDS ( $FIELDS )
+        INTO $POSTGRES_URL
+        TARGET TABLE $OPSDEV_USERNAME.{{._table_}}
+        TARGET COLUMNS ( $FIELDS )
+        WITH truncate, 
+             skip header = 1,
+             fields optionally enclosed by '"'
+
+      SET search_path to '$OPSDEV_USERNAME'
+      
+      BEFORE LOAD 
+        DO \$\$ DROP SCHEMA IF EXISTS $OPSDEV_USERNAME CASCADE; \$\$
+        DO \$\$ CREATE SCHEMA IF NOT EXISTS $OPSDEV_USERNAME; \$\$
+        DO \$\$ CREATE TABLE IF NOT EXISTS $OPSDEV_USERNAME.{{._table_}} ( $TFIELDS created_at timestamp default now()); \$\$
+      ;
+      EOF
+      echo "Please check the file {{._file_}}.load to set the field types, the execute it with --run"
+      fi
 
   lite2pg:
     desc: sqlite to postgres conversion
@@ -35,13 +79,18 @@ tasks:
         DO \$\$ CREATE SCHEMA IF NOT EXISTS $OPSDEV_USERNAME; \$\$
       ;
       EOF
-      pgloader {{._file_}}.load 
-      export PGPASSWORD=$POSTGRES_PASSWORD
-      pg_dump -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USERNAME" -d "$POSTGRES_DATABASE" -n $OPSDEV_USERNAME -F p --inserts --no-owner --no-privileges  -f  "{{._file_}}.sql"
+      if pgloader {{._file_}}.load 
+      then 
+          export PGPASSWORD=$POSTGRES_PASSWORD
+          pg_dump -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USERNAME" -d "$POSTGRES_DATABASE" -n $OPSDEV_USERNAME -F p --inserts --no-owner --no-privileges  -f  "{{._file_}}.sql"
+          echo "Exported {{._file_}}.sql"
+      else echo "pgloader failed"
+      fi
 
-  psql:
+  cli:
     desc: postgres psql command
     dir: $OPS_PWD
+    silent: true
     cmds:
     - |
       source $OPS_PWD/tests/.env

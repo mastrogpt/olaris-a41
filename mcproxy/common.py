@@ -51,16 +51,25 @@ def invoke(package, func, args):
     try:
         res = requests.post(url, auth=ops_auth, json=args)
         out = res.json().get("response", {}).get("result", {"error": "no response"})
-        return out.get("body", {})
+        return out
     except Exception as e:
         traceback.print_exc()
         return { "error": str(e) }
 
+
 logfile = os.getenv("LOGFILE")
 
 def log(func, sep, msg):
-    with open(logfile, "a") as f:
-        f.write(f"{PACKAGE}/{func} {sep} {json.dumps(msg)}\n")
+    if logfile:
+        with open(logfile, "a") as f:
+            f.write(f"{PACKAGE}/{func} {sep} {json.dumps(msg)}\n")
+
+def info(msg):
+    if logfile:
+        with open(logfile, "a") as f:
+            f.write(f"{PACKAGE} {msg}\n")
+
+info("Starting mcproxy server")
 
 mcp = FastMCP(name=PACKAGE)
 

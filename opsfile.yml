@@ -75,7 +75,9 @@ tasks:
       - echo "Config    " "$(realpath _svr/{{._package_}}.json)"
       - |
         if ! {{.__norun}}
-        then bun x @wong2/mcp-cli --config "_svr/{{._package_}}.json"
+        then 
+            echo "Log      " "$(realpath _svr/{{._package_}}.log)"
+            bun x @wong2/mcp-cli --config "_svr/{{._package_}}.json"
         fi
 
   new:

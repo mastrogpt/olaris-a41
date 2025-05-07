@@ -6,7 +6,8 @@ AI tasks to manage Postgresql
 
 ```text
 Usage:
-  pg psql [<command>]
+  pg cli [<command>]
   pg lite2pg <file>
+  pg csv2pg <file> <table> [--run]
   pg sqload <filesql> [--size=<count>] [--action=<action>]
 ```
