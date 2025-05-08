@@ -31,54 +31,6 @@ tasks:
         uv run -- python lesson.py list
       fi
 
-  _config:
-    desc: config
-    dir: 
-    cmds:
-      - |
-        cat <<EOF >mcpconfig.json
-        {
-          "mcpServers": {
-            "{{._package_}}": {
-              "command": "uv",
-              "args": ["@modelcontextprotocol/server-everything"],
-              "env": {
-                "hello": "Hello MCP!"
-              }
-            },
-        }
-        EOF
-
-  mcp:
-    desc: mcp
-    dir: mcproxy
-    interactive: true
-    silent: true
-    env:
-      PYTHONUBUFFERED: 1
-    cmds:
-      - uv python install 3.12
-      - if ! test -d .venv ; then uv venv --python 3.12 ; fi
-      - uv run python generator.py {{._package_}}
-      - uv run --with mcp mcp run "$(realpath _svr/{{._package_}}.py)"
-
-  mcptest:
-    desc: "mcp test: test a generated mcp server"
-    dir: mcproxy
-    interactive: true
-    silent: true
-    cmds:
-      - uv python install 3.12
-      - if ! test -d .venv ; then uv venv --python 3.12 ; fi
-      - uv run python generator.py {{._package_}} {{.__sample}}
-      - echo "Generated " "$(realpath _svr/{{._package_}}.py)"
-      - echo "Config    " "$(realpath _svr/{{._package_}}.json)"
-      - |
-        if ! {{.__norun}}
-        then 
-            echo "Log      " "$(realpath _svr/{{._package_}}.log)"
-            bun x @wong2/mcp-cli --config "_svr/{{._package_}}.json"
-        fi
 
   new:
     desc: new tool
@@ -107,9 +59,11 @@ tasks:
         else echo "Please specify --tool, --resource or --prompt"
         fi
 
-
   pg:
     desc: postgres 
     
   etc:
     desc: miscellaneous 
+
+  mcp:
+    desc: mcp

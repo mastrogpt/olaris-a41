@@ -1,0 +1,41 @@
+version: 3
+
+tasks:
+
+  install:
+    desc: install
+    dir: mcproxy
+    cmds:
+      - uv run install.py 
+
+  run:
+    desc: mcp
+    dir: mcproxy
+    interactive: true
+    silent: true
+    env:
+      PYTHONUBUFFERED: 1
+    cmds:
+      - uv python install 3.12
+      - if ! test -d .venv ; then uv venv --python 3.12 ; fi
+      - uv run python generator.py {{._package_}}
+      - uv run --with mcp mcp run "$(realpath _svr/{{._package_}}.py)"
+
+  test:
+    desc: "test a generated mcp server"
+    dir: mcproxy
+    interactive: true
+    silent: true
+    cmds:
+      - uv python install 3.12
+      - if ! test -d .venv ; then uv venv --python 3.12 ; fi
+      - uv run python generator.py {{._package_}} {{.__sample}}
+      - echo "Generated " "$(realpath _svr/{{._package_}}.py)"
+      - echo "Config    " "$(realpath _svr/{{._package_}}.json)"
+      - |
+        if ! {{.__norun}}
+        then 
+            echo "Log       " "$(realpath _svr/{{._package_}}.log)"
+            bun x @wong2/mcp-cli --config "_svr/{{._package_}}.json"
+        fi
+

@@ -6,11 +6,10 @@ AI tasks to manage Agent41
 
 ```text
 Usage:
-  a41 lesson [<name>] [--solution]
   a41 cli
   a41 new <package> [<description>] (--tool=<tool>|--resource=<resource>|--prompt=<prompt>|--clean=<clean>) [--redis] [--postgres] [--milvus] [--s3]
-  a41 mcp <package>
-  a41 mcptest <package> [--sample] [--norun]
+  a41 lesson [<name>] [--solution]
+  a41 mcp
   a41 pg
   a41 etc
 ```
