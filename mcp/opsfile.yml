@@ -6,7 +6,7 @@ tasks:
     desc: install
     dir: mcproxy
     cmds:
-      - uv run install.py 
+      - uv run install.py "{{._package_}}" "{{.__uninstall}}" "{{.__cursor}}" "{{.__claude}}" "{{.__5ire}}" 
 
   run:
     desc: mcp
