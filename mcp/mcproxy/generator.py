@@ -1,30 +1,10 @@
 import os, sys, requests
 from pathlib import Path
-from requests.auth import HTTPBasicAuth
+
+import openwhisk
     
 COMMON = Path("common.py").read_text()
 SAMPLE = Path("sample.py").read_text()
-
-APIHOST = os.getenv("OPSDEV_APIHOST")
-NAMESPACE = os.getenv("OPSDEV_USERNAME")
-AUTH = os.getenv("AUTH")
-if AUTH is None:
-    print("You are not logged in. Please run 'ops ide login' to login.")
-    sys.exit(1) 
-
-ops_auth = HTTPBasicAuth(AUTH.split(":")[0], AUTH.split(":")[1])
-
-def call(cmd, args=None):
-    url = f"{APIHOST}/api/v1/namespaces/{NAMESPACE}/{cmd}"
-    try:
-        if args:
-            response = requests.post(url, auth=ops_auth, json=args)
-        else:
-            response = requests.get(url, auth=ops_auth)
-        return response.json()
-    except Exception as e:
-        print(e)
-        return None
 
 def extract_types(actions, package):
     """
@@ -34,7 +14,7 @@ def extract_types(actions, package):
     result = {}
     
     # Expected namespace for filtering
-    target_namespace = f"{NAMESPACE}/{package}"
+    target_namespace = f"{openwhisk.NAMESPACE}/{package}"
     
     # Process each action
     for action in actions:
@@ -67,7 +47,6 @@ def extract_types(actions, package):
     
     return result
 
-
 def config(package):
     # Get the current working directory
     dir = os.path.abspath(os.getcwd())
@@ -98,7 +77,6 @@ def extract_default(ann_value):
     start = ann_value.find("(default=") + len("(default=")
     end = ann_value.find(")", start)
     return ann_value[start:end] if end != -1 else None
-
 
 def generate(types, package, sample):
     """
@@ -203,7 +181,8 @@ def generate(types, package, sample):
 def main(package, sample):
     # Get all actions
     
-    types = extract_types(call("actions"), package)
+    actions = openwhisk.call("actions")
+    types = extract_types(actions, package)
     generate(types, package, sample)
     config(package)
 
