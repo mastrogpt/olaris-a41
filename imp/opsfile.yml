@@ -1,0 +1,11 @@
+version: '3'
+# Licensed to the Apache Software Foundation (ASF) under one
+
+vars:
+  OS: '{{OS}}'
+  ARCH: '{{ARCH}}'
+
+tasks:
+
+  gdocs:
+    desc: "Googl Docs Dowloader"

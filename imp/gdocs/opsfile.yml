@@ -1,0 +1,15 @@
+version: '3'
+
+vars:
+  OS: '{{OS}}'
+  ARCH: '{{ARCH}}'
+
+tasks:
+
+  download:
+    desc: "Download"
+    dir: ..
+    cmds:
+     - pwd
+     - uv run python -m gdocs download "{{._name_}}"
+
