@@ -80,6 +80,7 @@ def install_cursor(package, file, uninstall):
     # Save updated config
     Path(file).write_text(json.dumps(config, indent=2))
 
+
 [package, uninstall, cursor, claude, fire] = sys.argv[1:]
 
 

@@ -5,6 +5,7 @@ import openwhisk
     
 COMMON = Path("common.py").read_text()
 SAMPLE = Path("sample.py").read_text()
+SSE = Path("sse.py").read_text()
 
 def extract_types(actions, package):
     """
@@ -175,8 +176,12 @@ def generate(types, package, sample):
             f.write(f'    if logfile: log("{key}", "<<<", res)\n')
             f.write(f'    {res_to_out}\n')
             f.write(f'    return out\n\n')
+    
+
         #f.write(f'print("Starting", PACKAGE)\n')
         #f.write(f"mcp.run(transport='sse')\n")
+        # Write sse code
+        f.write(SSE.replace("{package}", package))
 
 def main(package, sample):
     # Get all actions

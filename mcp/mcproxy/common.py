@@ -38,11 +38,12 @@ if APIHOST is None:
     
 ops_auth = HTTPBasicAuth(AUTH.split(":")[0], AUTH.split(":")[1])
 
-NAMESPACE =  None
-try: 
-    NAMESPACE = requests.get(f"{APIHOST}/api/v1/namespaces", auth=ops_auth).json()[0]
-    #print("Connected to", NAMESPACE)
-except: print("error retrieving namespace")
+NAMESPACE = os.getenv("OPSDEV_USERNAME", None)
+if NAMESPACE is None:
+    try: 
+        NAMESPACE = requests.get(f"{APIHOST}/api/v1/namespaces", auth=ops_auth).json()[0]
+        print("Connected to", NAMESPACE)
+    except: print("error retrieving namespace")
 
 def invoke(package, func, args):
     if NAMESPACE is None:
