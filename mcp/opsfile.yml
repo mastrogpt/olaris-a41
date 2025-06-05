@@ -6,20 +6,27 @@ tasks:
     desc: install
     dir: mcproxy
     cmds:
-      - uv run install.py "{{._package_}}" "{{.__uninstall}}" "{{.__cursor}}" "{{.__claude}}" "{{.__5ire}}" 
+      - uv run install.py "{{._package_}}" "{{.__uninstall}}" "{{.__cursor}}" "{{.__claude}}" "{{.__5ire}}" "{{.__sse}}"
 
   run:
     desc: mcp
     dir: mcproxy
     interactive: true
-    silent: true
+    silent: false
     env:
       PYTHONUBUFFERED: 1
     cmds:
       - uv python install 3.12
       - if ! test -d .venv ; then uv venv --python 3.12 ; fi
       - uv run python generator.py {{._package_}}
-      - uv run --with mcp mcp run "$(realpath _svr/{{._package_}}.py)"
+      - |
+        if ! {{.__sse}}
+        then 
+            uv run --with mcp mcp run "$(realpath _svr/{{._package_}}.py)"
+        else
+            uv run "$(realpath _svr/{{._package_}}.py)"
+        fi 
+      
 
   test:
     desc: "test a generated mcp server"
