@@ -80,7 +80,7 @@ def install_cursor(package, file, uninstall):
     # Save updated config
     Path(file).write_text(json.dumps(config, indent=2))
 
-[package, uninstall, cursor, claude, fire] = sys.argv[1:]
+[package, uninstall, cursor, claude, fire, sse] = sys.argv[1:]
 
 
 import openwhisk
@@ -124,3 +124,6 @@ elif fire == "true":
 
 elif claude == "true":
     print("TODO Installing MCP with Claude")
+
+elif sse == "true":
+    print("TODO Installing MCP with SSE")

@@ -6,8 +6,8 @@ AI tasks to manage Agent41 MCP
 
 ```text
 Usage:
-  mcp run <package>
+  mcp run <package> [--sse]
   mcp test <package> [--sample] [--norun]
-  mcp install [<package>] [--cursor] [--claude] [--5ire] [--uninstall]
+  mcp install [<package>] [--cursor] [--claude] [--5ire] [--sse] [--uninstall]
 ```
 
