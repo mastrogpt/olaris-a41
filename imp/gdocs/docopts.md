@@ -4,7 +4,7 @@
 Usage:
   gdocs list <folder>
   gdocs parse <document> [<file>]
-  gdocs import <folder> [<substring>] [--collection=<collection>] 
+  gdocs import <folder> [<substring>] [--collection=<collection>] [--json=<json>]
 ```
 
 This command requires:

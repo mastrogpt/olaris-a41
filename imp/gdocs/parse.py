@@ -17,23 +17,25 @@ def download_doc(drive_sv, DID):
         #mime = info.get("mimeType", "")
         
         #detect a file is in google doc format and download the content
-        print(file.get("name"), file.get("mimeType"))
-        if file.get("mimeType") == "application/vnd.google-apps.document":
+        name = file.get("name")
+        mime = file.get("mimeType")
+        print("===",name,mime)
+        if mime== "application/vnd.google-apps.document":
             #export the content
             content = drive_sv.files().export_media(fileId=DID, mimeType="text/plain").execute()
         else:
             #download the content
             content = drive_sv.files().get_media(fileId=DID).execute()
             
-        
+        # remove empty lines
+
         # Write to temp file
         import tempfile
         temp = tempfile.NamedTemporaryFile(delete=False, mode='wb')
         temp.write(content)
         temp.close()
         filename = temp.name
-        print(filename)
-        return filename
+        return filename, name
         
     except Exception as e:
         print(f"Error downloading document: {e}")
@@ -45,11 +47,13 @@ def extract_text_and_remove(filename):
     os.unlink(filename)
     return parsed.get("content")
 
+
 def parse_doc(DID):
     drive_sv = common.drive_sv()
-    filename = download_doc(drive_sv, DID)
+    filename, name = download_doc(drive_sv, DID)
     text = extract_text_and_remove(filename)
-    return text
+    text = "\n".join([line for line in text.split("\n") if line.strip() != ""])
+    return name, text
 
 def main(argv):
     """
@@ -64,7 +68,7 @@ def main(argv):
     
     DID = common.get_id(DOC, "doc")
     print(DID)
-    text = parse_doc(DID)
+    _, text = parse_doc(DID)
 
     if FILE == "":
         print(text) 

@@ -23,5 +23,5 @@ tasks:
     desc: "Import all files in a folder"
     dir: ..
     cmds:
-     - uv run -m gdocs import  "{{._folder_}}" "{{.__collection}}" "{{._substring_}}"
+     - uv run -m gdocs import  "{{._folder_}}" "{{.__json}}" "{{.__collection}}"  "{{._substring_}}"
 
