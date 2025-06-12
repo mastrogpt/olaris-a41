@@ -1,9 +1,12 @@
 __pycache__
 _svr
 _src
+_sse
 .venv
 cli/profile_default/log
 cli/profile_default/pid
 cli/profile_default/security
 cli/profile_default/history.sqlite
 cli/profile_default/db/
+node_modules
+mcp/mcproxy/kubernetes/_*.yaml
