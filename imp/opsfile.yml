@@ -8,4 +8,7 @@ vars:
 tasks:
 
   gdocs:
-    desc: "Googl Docs Dowloader"
+    desc: "Google Docs Importer"
+
+  text:
+    desc: "Text Importer"

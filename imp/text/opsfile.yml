@@ -1,0 +1,15 @@
+version: '3'
+
+vars:
+  OS: '{{OS}}'
+  ARCH: '{{ARCH}}'
+
+tasks:
+
+  csvimp:
+    desc: "Import csv file field"
+    dir: ..
+    cmds:
+     - uv run -m text csvimp "{{._file_}}" "{{._field_}}" "{{.__meta}}" "{{._substring_}}" "{{.__collection}}" "{{.__group}}"
+
+

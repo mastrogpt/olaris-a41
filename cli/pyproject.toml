@@ -44,5 +44,10 @@ dependencies = [
     "langchain-milvus==0.1.7",
     "bcrypt==4.2.1",
     "chevron==0.14.0",
-    "chess==1.11.1"
+    "chess==1.11.1",
+    "google-api-python-client>=2.170.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.2.2",
+    "python-docx>=1.1.2",
+    "tika>=3.1.0",
 ]
