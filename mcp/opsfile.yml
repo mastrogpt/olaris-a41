@@ -140,11 +140,16 @@ tasks:
           echo $AUTH
       CONTROLLER:
         sh: |
-          PORT=$(kubectl get service/controller -o jsonpath='{.spec.ports[0].port}')
+          PORT=$(kubectl -n nuvolaris get service/controller -o jsonpath='{.spec.ports[0].port}')
           echo "http://controller:$PORT"
       PACKAGE:
         sh: |
           echo "{{._package_}}"
+      IMAGE_TAG:
+        sh: |
+          kubectl get cm/openwhisk-runtimes -o jsonpath='{.data.runtimes\.json}' \
+          | jq -r '.runtimes.python[] | select(.kind == "python:3.13") | .image.tag' \
+          | sed -E 's/.*-([0-9]+)$/\1/'
       HOSTNAME:
         sh: |
           if test -n "{{._hostname}}"

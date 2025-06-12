@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: runtime-container
-        image: apache/openserverless-runtime-python:v3.13-2506071010
+        image: apache/openserverless-runtime-python:v3.13-${IMAGE_TAG}
         command: ["python"]
         args: ["${PACKAGE}.py"]
         volumeMounts:
