@@ -12,3 +12,7 @@ tasks:
 
   text:
     desc: "Text Importer"
+
+  finetune:
+    desc: "Import for finetuning"
+

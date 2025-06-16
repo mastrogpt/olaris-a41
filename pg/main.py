@@ -31,7 +31,9 @@ def process(filename, action, max, exec):
     """
     with open(filename, 'r') as file:
         statements = []
+        count = 0
         while True:
+            count += 1
             statement = slurp_statement(file)
             #print(statement)
             if statement is None:
@@ -40,6 +42,7 @@ def process(filename, action, max, exec):
                 break
             statements.append(statement)
             if len(statements) >= max:
+                print(f"{count}:", end="")
                 exec(action, statements)
                 statements = []
     

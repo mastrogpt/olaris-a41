@@ -1,0 +1,14 @@
+version: '3'
+
+vars:
+  OS: '{{OS}}'
+  ARCH: '{{ARCH}}'
+
+tasks:
+
+  qagen:
+    desc: "Generate Finetune Data"
+    dir: ..
+    cmds:
+     - uv run -m finetune qagen "{{._jsondocs_}}"
+
