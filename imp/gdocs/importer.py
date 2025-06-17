@@ -47,9 +47,8 @@ def main(argv):
             if len(text) > maxlen:
                 maxlen = len(text)
 
-            print("===", name, "==================")
             if COLLECTION !="":
-                post_text(text, COLLECTION,  ACTION)
+                post_text(text, file.get("name", "unknown"), COLLECTION,  ACTION)
             elif JSON !="":
                 json_data[name] = text
                 with open(JSON, "w") as f:

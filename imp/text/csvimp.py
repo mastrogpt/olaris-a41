@@ -1,6 +1,6 @@
 import os, sys
-from pathlib import Path
 import csv
+from pathlib import Path
 from common import create_collection, post_text, post_text_append, post_text_flush
 
 ACTION = "mastrogpt/loader"
