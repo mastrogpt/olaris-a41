@@ -61,7 +61,9 @@ def config(package):
       "command": "uv",
       "args": ["--directory", "{dir}", "run", "mcp", "run", "_svr/{package}.py"],
       "env": {{
-          "LOGFILE": "_svr/{package}.log"
+          "LOGFILE": "_svr/{package}.log",
+          "APIHOST": "{os.getenv("APIHOST") or ""}",
+          "AUTH": "{os.getenv("AUTH") or ""}"
       }}
     }}
   }}
@@ -110,7 +112,6 @@ def generate(types, package, sample):
 
         if sample:
             f.write(SAMPLE)
-
 
         # Process each function
         items = list(types.items())

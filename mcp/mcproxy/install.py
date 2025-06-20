@@ -5,7 +5,7 @@ import platform
 import shutil
 from pathlib import Path
 
-os.chdir(os.getenv("OPS_PWD"))
+os.chdir(os.getenv("OPS_PWD") or ".")
 
 def list_mcp_packages(actions):
     """
@@ -74,14 +74,18 @@ def install_cursor(package, file, uninstall):
         config["mcpServers"][package] = {
             "command": "ops",
             "name": package,
-            "args": ["a41", "mcp", "run", package]
+            "args": ["a41", "mcp", "run", package],
+            "env": {
+                "APIHOST": os.getenv("APIHOST") or os.getenv("OPSDEV_APIHOST") or "",
+                "AUTH": os.getenv("AUTH") or ""
+            }
         }
 
     # Save updated config
     Path(file).write_text(json.dumps(config, indent=2))
 
 
-[package, uninstall, cursor, claude, fire] = sys.argv[1:]
+[package, uninstall, cursor, claude, fire, sse] = sys.argv[1:]
 
 
 import openwhisk
@@ -109,7 +113,7 @@ if cursor =="true":
 elif fire == "true":
     system = platform.system()
     if system == 'Windows':
-        base_dir = os.getenv('APPDATA') or os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Roaming')
+        base_dir = os.getenv('APPDATA') or os.path.join(os.getenv('USERPROFILE') or "", 'AppData', 'Roaming')
         config_path = os.path.join(base_dir, '5ire', 'mcp.json')
     elif system == 'Darwin':  # macOS
         base_dir = os.path.expanduser('~/Library/Application Support/5ire')

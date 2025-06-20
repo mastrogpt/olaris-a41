@@ -106,6 +106,14 @@ tasks:
             bun x @wong2/mcp-cli --pass-env --config "_svr/{{._package_}}.json"
         fi
   
+
+  _kill-existing-inspector:
+    desc: "kill existing inspector"
+    silent: true
+    ignore_error: true
+    cmds:
+      - bun x find-process -t name "@modelcontextprotocol/inspector" | rg 'pid' | awk '{ print $2 }' | xargs -r kill
+
   inspect:
     desc: "inspect a generated mcp server"
     dir: mcproxy
@@ -115,7 +123,7 @@ tasks:
       - test -n "$OPSDEV_USERNAME" || (echo "Please perform an ops ide login first." && exit 1)
       - test -n "$OPSDEV_APIHOST" || (echo "Please perform an ops ide login first." && exit 1)
       - bun install
-      - bunx find-process -t name "@modelcontextprotocol/inspector" | rg 'pid' | awk '{ print $2 }' | xargs -r kill
+      - task: _kill-existing-inspector
       - | 
         if ! {{.__sse}}
         then

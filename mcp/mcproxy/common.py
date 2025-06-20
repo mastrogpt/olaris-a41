@@ -21,9 +21,9 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
-# first load wskprops if ani
-dotenv.load_dotenv(os.path.expanduser("~/.wskprops"))
+# first load wskprops if there is no AUTH
+if os.getenv("AUTH") is None:
+    dotenv.load_dotenv(os.path.expanduser("~/.wskprops"))
 
 # get info from the environment
 AUTH = os.getenv("AUTH")
