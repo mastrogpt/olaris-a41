@@ -2,6 +2,7 @@ version: 3
 
 tasks:
   
+  # scrvimi qualcosa qui ->hello openserverless <-
   cli:
     desc: cli
     env:
@@ -32,32 +33,6 @@ tasks:
       fi
 
 
-  new:
-    desc: new tool
-    dir: new
-    interactive: true
-    silent: true
-    cmds:
-      - |
-        if test -n "{{.__tool}}"
-        then TYPE="tool" ; NAME="{{.__tool}}"
-        elif test -n "{{.__resource}}"
-        then TYPE="resource" ; NAME="{{.__resource}}"
-        elif test -n "{{.__prompt}}"
-        then TYPE="prompt" ; NAME="{{.__prompt}}"
-        elif test -n "{{.__clean}}"
-        then TYPE="clean" ; NAME="{{.__clean}}"
-        fi
-        if test -n "$TYPE"
-        then 
-             export NEW_REDIS="{{.__redis}}"
-             export NEW_POSTGRES="{{.__postgres}}"
-             export NEW_MILVUS="{{.__milvus}}"
-             export NEW_S3="{{.__s3}}"
-             env | grep NEW_ 
-             uv run python main.py "$TYPE" "{{._package_}}" "$NAME" "{{._description_}}"
-        else echo "Please specify --tool, --resource or --prompt"
-        fi
 
   pg:
     desc: postgres 

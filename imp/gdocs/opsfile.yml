@@ -10,7 +10,7 @@ tasks:
     desc: "List Folder"
     dir: ..
     cmds:
-     - uv run -m gdocs list "{{._folder_}}"
+     - uv run -m gdocs list "{{._folder_}}" "{{._substring_}}"
 
   parse:
     desc: "Parse Document"
@@ -23,5 +23,5 @@ tasks:
     desc: "Import all files in a folder"
     dir: ..
     cmds:
-     - uv run -m gdocs import  "{{._folder_}}" "{{.__json}}" "{{.__collection}}"  "{{._substring_}}"
+     - uv run -m gdocs import  "{{._folder_}}" "{{.__process}}" "{{.__save}}" "{{.__collection}}"  "{{._substring_}}"
 

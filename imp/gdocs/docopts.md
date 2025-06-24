@@ -2,9 +2,9 @@
 
 ```text
 Usage:
-  gdocs list <folder>
+  gdocs list <folder> [<substring>]
   gdocs parse <document> [<file>]
-  gdocs import <folder> [<substring>] [--collection=<collection>] [--json=<json>]
+  gdocs import <folder> [<substring>] [--process=<action>][--collection=<collection>] [--save=<file>]
 ```
 
 This command requires:

@@ -20,9 +20,11 @@ tasks:
   lite2pg:
     desc: sqlite to postgres conversion
     dir: $OPS_PWD
+    silent: true
     cmds:
     - which pg_dump || die "pg_dump not found"
     - which pgloader || die "pgloader not found"
+    - test -n "$OPSDEV_USERNAME" || die "please login to openserverless first"
     - |
       source $OPS_PWD/tests/.env
       FILE="$(realpath {{._file_}})"

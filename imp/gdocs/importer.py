@@ -10,8 +10,8 @@ def main(argv):
     """
     Parse Document
     """
-    [FOLDER, JSON, COLLECTION, SUBSTRING] = argv
-    print(FOLDER, JSON, COLLECTION, SUBSTRING)
+    [FOLDER, PROCESS, SAVE, COLLECTION, SUBSTRING] = argv
+    print(FOLDER, PROCESS, SAVE, COLLECTION, SUBSTRING)
 
     os.chdir(os.environ.get("OPS_PWD", "."))
 
@@ -27,7 +27,8 @@ def main(argv):
     count = 0
     dids = []
 
-    json_data = {}
+    if SAVE != "" and os.path.exists(SAVE):
+        os.unlink(SAVE)
 
     for file in result.get("files", []):
         did = file.get("id")
@@ -40,6 +41,7 @@ def main(argv):
             count += 1
             try:
                 name, text = gdocs.parse.parse_doc(did)
+                body  = f"<!-- {name} -->\n{text}\n"
             except Exception as e:
                 print(f"Error parsing {did}: {e}")
                 continue
@@ -49,10 +51,9 @@ def main(argv):
 
             if COLLECTION !="":
                 post_text(text, file.get("name", "unknown"), COLLECTION,  ACTION)
-            elif JSON !="":
-                json_data[name] = text
-                with open(JSON, "w") as f:
-                    f.write(json.dumps(json_data, indent=2))
+            elif SAVE !="":
+                with open(SAVE, "a") as f:
+                    f.write(body)
             else:
                 print(text)
 

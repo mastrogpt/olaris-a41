@@ -29,11 +29,13 @@ def main(argv):
     """
     List Folder
     """
-    [FOLDER] = argv
+    [FOLDER, SUBSTRING] = argv
     
     result = list_folder(FOLDER)
     for file in result.get("files", []):
-        print(f"https://docs.google.com/document/d/{file.get('id', '')}\t{file.get('name', '')}")
+        name = file.get('name', '')
+        if  SUBSTRING in name:
+            print(f"https://docs.google.com/document/d/{file.get('id', '')}\t{name}")
     
 if __name__ == "__main__":
     import sys
