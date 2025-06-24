@@ -1,0 +1,27 @@
+version: '3'
+
+vars:
+  OS: '{{OS}}'
+  ARCH: '{{ARCH}}'
+
+tasks:
+
+  list:
+    desc: "List Folder"
+    dir: ..
+    cmds:
+     - uv run -m gdocs list "{{._folder_}}"
+
+  parse:
+    desc: "Parse Document"
+    dir: ..
+    cmds:
+     - uv run -m gdocs parse "{{._document_}}" "{{._file_}}"
+
+
+  import:
+    desc: "Import all files in a folder"
+    dir: ..
+    cmds:
+     - uv run -m gdocs import  "{{._folder_}}" "{{.__json}}" "{{.__collection}}"  "{{._substring_}}"
+
