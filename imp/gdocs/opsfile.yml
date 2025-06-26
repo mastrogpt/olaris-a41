@@ -18,7 +18,6 @@ tasks:
     cmds:
      - uv run -m gdocs parse "{{._document_}}" "{{._file_}}"
 
-
   import:
     desc: "Import all files in a folder"
     dir: ..

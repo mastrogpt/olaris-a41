@@ -6,7 +6,7 @@ AI tasks to manage Agent41
 
 ```text
 Usage:
-  a41 lesson [<name>] [--solution]
+  a41 new <action>
   a41 cli
   a41 pg
   a41 imp

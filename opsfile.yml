@@ -16,22 +16,60 @@ tasks:
         test -e $OPS_PWD/tests/.env && source $OPS_PWD/tests/.env
         uv run ipython
 
-  lesson:
-    desc: lesson management
-    silent: true
-    dir: lesson
-    cmds:
-    - |
-      if test -n "{{._name_}}"
-      then
-        if {{.__solution}}
-        then uv run -- python lesson.py solution {{._name_}}
-        else uv run -- python lesson.py lesson {{._name_}}
-        fi
-      else
-        uv run -- python lesson.py list
-      fi
 
+  new:
+    silent: true
+    desc: generate a new python action
+    vars:
+       ACTION: 
+         sh: echo  "{{._action_}}" | cut -d/ -f2
+       PACKAGE: 
+         sh: echo  "{{._action_}}" | cut -d/ -f1
+    env:
+       ACTION: "{{.ACTION}}"
+       PACKAGE: "{{.PACKAGE}}"
+       DIR:  "packages/{{.PACKAGE}}/{{.ACTION}}"
+       FILE: "packages/{{.PACKAGE}}/{{.ACTION}}/{{.ACTION}}.py"
+    cmds:
+    #- test ! -e "$OPS_PWD/$FILE" || die "file already exists"
+    - echo $ACTION
+    - echo $PACKAGE
+    - echo $DIR
+    - echo $FILE
+    - |
+      mkdir -p $OPS_PWD/tests/$PACKAGE
+      mkdir -p $OPS_PWD/$DIR
+    - |
+      cat <<EOF >$OPS_PWD/$FILE
+      def $ACTION(args):
+        return { "output": "$ACTION" }
+      EOF
+    - |
+      cat <<EOF >$OPS_PWD/$DIR/__main__.py
+      #--kind python:default
+      #--web true
+      import $ACTION
+      def main(args):
+        return { "body": $ACTION.$ACTION(args) }
+      EOF
+    - |
+      cat <<EOF >$OPS_PWD/tests/$PACKAGE/test_${ACTION}.py
+      import sys 
+      sys.path.append("$DIR")
+      import $ACTION
+      
+      def test_$ACTION():
+          res = $ACTION.$ACTION({})
+          assert res["output"] == "$ACTION"
+      EOF
+    - |
+      cat <<EOF >$OPS_PWD/tests/$PACKAGE/test_${ACTION}_int.py
+      import os, requests as req
+      def test_$ACTION():
+          url = os.environ.get("OPSDEV_HOST") + "/api/my/$PACKAGE/$ACTION"
+          res = req.get(url).json()
+          assert res.get("output") == "$ACTION"
+      EOF
 
 
   pg:

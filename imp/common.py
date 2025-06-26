@@ -1,4 +1,4 @@
-import os, pathlib
+import sys, os, pathlib
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
@@ -60,12 +60,18 @@ def post_text(text, meta, collection, action, sep=None):
         # a temp file
         with tempfile.NamedTemporaryFile(mode='w+', delete=True) as temp_file:
             #print(msg)
-            pathlib.Path("/tmp/appo.json").write_text(json.dumps(msg, indent=2))
             temp_file.write(json.dumps(msg))
             temp_file.flush() 
             cmd = ["ops", "invoke", action, "-P", temp_file.name ]
-            res = subprocess.run(cmd, check=True, capture_output=True)
-            print(res.stdout.decode("utf-8"))
+            try:
+                res = subprocess.run(cmd, check=True, capture_output=True)
+                print(res.stdout.decode("utf-8"))
+            except Exception as e:
+                print(e)
+                print(cmd)
+                pathlib.Path("/tmp/latest_parameters.json").write_text(json.dumps(msg, indent=2))
+                print("saved in /tmp/latest_parameters.json")
+                sys.exit(1)
         try:
             print(json.loads(res.stdout.decode("utf-8")).get("body", {}).get("output", {}))
         except: 
