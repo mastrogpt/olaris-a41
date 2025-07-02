@@ -4,7 +4,7 @@
 Usage:
   gdocs list <folder> [<substring>]
   gdocs parse <document> [<file>]
-  gdocs import <folder> [<substring>] [--process=<action>][--collection=<collection>] [--save=<file>]
+  gdocs import <folder> [<substring>] [--process=<action>] [--collection=<collection>] [--save=<dir>]
 ```
 
 This command requires:
@@ -17,4 +17,5 @@ This command requires:
 <document> is GDocs document url
 <collection> is a collection name, in format `name[:size]` (size defaults to 4096)
 <substring> of the name to select
+<dir> is a local directory where to save data
 ```

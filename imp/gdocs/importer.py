@@ -1,7 +1,7 @@
 import gdocs.list
 import gdocs.parse
 from pathlib import Path
-from common import create_collection, post_text
+from common import create_collection, post_text, save_text
 import os, json
 
 ACTION = "mastrogpt/loader"
@@ -27,15 +27,12 @@ def main(argv):
     count = 0
     dids = []
 
-    if SAVE != "" and os.path.exists(SAVE):
-        os.unlink(SAVE)
-
     for file in result.get("files", []):
         did = file.get("id")
         dids.append(did)
         name = file.get("name")
         if not SUBSTRING in name:
-            print("skipping", name)
+            #print("skipping", name)
             continue
         if did:
             count += 1
@@ -49,13 +46,26 @@ def main(argv):
             if len(text) > maxlen:
                 maxlen = len(text)
 
+            if PROCESS != "":
+                print(f"Processing {name}")
+                text = post_text(text, PROCESS, name)
+                if text is None:
+                    print(f"Error processing {name}")
+                    continue
+            
+            if SAVE !="":
+                #print(text)
+                save_text(SAVE, text, name)
+         
             if COLLECTION !="":
-                post_text(text, file.get("name", "unknown"), COLLECTION,  ACTION)
-            elif SAVE !="":
-                with open(SAVE, "a") as f:
-                    f.write(body)
-            else:
+                res = post_text(text, file.get("name", "unknown"), COLLECTION,  ACTION)
+                if res is None:
+                    print(f"Error posting {name}")
+                    continue
+
+            if SAVE == "" and COLLECTION == "":
                 print(text)
+
 
     print("--------------------------------")
     print(f"Total: {count}")

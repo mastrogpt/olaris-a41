@@ -6,10 +6,17 @@ vars:
 
 tasks:
 
-  csvimp:
-    desc: "Import csv file field"
+  csv:
+    desc: "Import csv file by field"
     dir: ..
     cmds:
-     - uv run -m text csvimp "{{._file_}}" "{{._field_}}" "{{.__meta}}" "{{._substring_}}" "{{.__collection}}" "{{.__group}}"
+     - uv run -m text csvimp "{{._filecsv_}}" "{{._field_}}" "{{.__meta}}" "{{._substring_}}" "{{.__collection}}" "{{.__group}}"
+
+  # text dirimp <dir> [<substring>] [--collection=<collection>] [--group=<count>]
+  dir:
+    desc: "Import files in a directory field"
+    dir: ..
+    cmds:
+     - uv run -m text dirimp "{{._dir_}}" "{{._substring_}}" "{{.__collection}}" "{{.__group}}" "{{.__filter}}"
 
 
