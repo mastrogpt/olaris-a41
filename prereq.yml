@@ -9,6 +9,43 @@ vars:
 
 tasks:
 
+  download-and-extract:
+     requires:
+       vars: 
+       - FILE
+       - URL
+       - OUT
+     cmds:
+     - echo "{{.OUT}} {{.FILE}} {{.URL}} {{.FILETAR}}" 
+     - curl -sL "{{.URL}}" -o {{.FILE}}
+     - extract "{{.FILE}}" "{{.OUT}}{{.EXE}}"
+     - remove "{{.FILE}}"
+  
+  himalaya:
+    desc: download himalaya
+    vars:
+      VERSION: "1.1.0"
+      SUFFIX:
+        sh: |
+            case "{{.OS}}-{{.ARCH}}" in
+            linux-amd64) echo "x86_64-linux" ;;
+            linux-arm64) echo "aarch64-linux" ;;
+            darwin-amd64) echo "x86_64-darwin" ;;
+            darwin-arm64) echo "aarch64-darwin" ;; 
+            windows-*) echo "x86_64-windows" ;;
+            *) echo "unknown" ;;
+            esac
+            #https://github.com/pimalaya/himalaya/releases/download/v1.1.0/himalaya.aarch64-darwin.tgz
+      URL:  "https://github.com/pimalaya/himalaya/releases/download/v{{.VERSION}}/himalaya.{{.SUFFIX}}.tgz"
+      FILE: "{{base .URL}}"
+      OUT: himalaya
+    cmds:
+    - task: download-and-extract
+      vars:
+        URL: "{{.URL}}"
+        FILE: "{{.FILE}}"
+        OUT: himalaya
+  
   claude:
     desc: claude code
     vars:
@@ -18,6 +55,9 @@ tasks:
     - echo -e '#!/bin/bash\nexec $HOME/.bun/bin/claude "$@"\n' > claude
     - executable claude
 
+  all:
+    - task: himalaya
+    
   test:
     vars:
       DIR: "{{.OPS_PWD}}/bin/{{.OS}}-{{.ARCH}}"
