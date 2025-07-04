@@ -4,7 +4,7 @@ from pathlib import Path
 from common import create_collection, post_text, save_text
 import os, json
 
-ACTION = "mastrogpt/loader"
+ACTION = "agent41/loader"
 
 def main(argv):
     """
