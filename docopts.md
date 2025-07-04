@@ -10,6 +10,7 @@ Usage:
   a41 cli
   a41 pg
   a41 imp
+  a41 finetune
   a41 etc
 ```
 

@@ -6,9 +6,8 @@ vars:
 
 tasks:
 
-  qagen:
-    desc: "Generate Finetune Data"
-    dir: ..
+  go:
+    desc: "Finetune"
     cmds:
      - uv run -m finetune qagen "{{._jsondocs_}}"
 
