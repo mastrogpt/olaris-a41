@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, glob
 
 import torch
 print("torch:", torch.__version__, torch.cuda.is_available())
@@ -11,7 +11,10 @@ from datasets import load_dataset
 
 from unsloth import FastLanguageModel
 from unsloth.chat_templates import get_chat_template
+from unsloth.save import create_ollama_modelfile
 from trl import SFTConfig, SFTTrainer
+
+from pathlib import Path
 
 def load(folder, tokenizer):
 
@@ -23,7 +26,7 @@ def load(folder, tokenizer):
 
     dataset = dataset.map(to_chatml, remove_columns=["messages"])
 
-def train(folder, model_name, chat_template):
+def train(folder, model_name):
 
     model, tokenizer = FastLanguageModel.from_pretrained(
         model_name = model_name,
@@ -32,7 +35,7 @@ def train(folder, model_name, chat_template):
         load_in_4bit = True,
         # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
     )
-    tokenizer = get_chat_template(tokenizer, chat_template)
+    #tokenizer = get_chat_template(tokenizer, chat_template)
     dataset = load(folder, tokenizer)
     #print(tokenizer.chat_template)
 
@@ -75,10 +78,16 @@ def train(folder, model_name, chat_template):
     )
     trainer_stats = trainer.train()
 
+    folderout = f"{folder}_out"
+    os.makedirs(folderout, exist_ok=True)
+    #model.save_pretrained_merged(folderout, tokenizer, save_method = "merged_16bit",)
+    model.save_pretrained_gguf(folderout, tokenizer)
+    os.listdir(folderout)
+    gguf = glob.glob(f"{folderout}/*.gguf")[0]
+    Path(f"{folderout}/Modelfile").write_text(f"FROM {gguf}\n")
 
 def main(argv):
-    model_name = "unsloth/llama-3-8b-bnb-4bit"
-    chat_template = "llama-3"
+    model_name = "unsloth/Meta-Llama-3.1-8B-Instruct"
 
     args = sys.argv[1:]
     if len(argv) == 0:
@@ -91,4 +100,5 @@ def main(argv):
         print(f"Folder {folder} does not exist.")
         sys.exit(1)
     
-    train(folder, model_name, chat_template)
+    train(folder, model_name)
+

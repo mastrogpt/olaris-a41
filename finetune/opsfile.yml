@@ -6,14 +6,12 @@ vars:
 
 tasks:
 
-  sh: ops -sh
-
   cli:
     desc: "CLI"
     cmds:
      - uv run ipython --ipython-dir=.
 
-  go:
+  finetune:
     requires:
       vars: [_dir_]
     env:
@@ -22,8 +20,20 @@ tasks:
     desc: "Finetune"
     cmds:
      - task: setup
-     - uv run go.py "$DIR"
-     - uv run llama.cpp/convert_hf_to_gguf.py "$DIR/merged_model" --outfile "$DIR.model"
+     - uv run finetune.py "$DIR"
+
+  load:
+    desc: "Finetune"
+    requires:
+      vars: [_dir_]
+    env:
+      DIR:
+        sh: opspath "{{._dir_}}" 
+      MODEL: "{{base ._dir_}}"
+    cmds:
+     - |
+       uv run llama.cpp/convert_hf_to_gguf.py "${DIR}_out" --outfile "${DIR}_out/model.gguf"
+       ollama create $MODEL -f "$DIR/model_ollama/Modelfile"
 
   reset:
     desc: "Reset"
