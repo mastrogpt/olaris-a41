@@ -6,8 +6,56 @@ vars:
 
 tasks:
 
+  sh: ops -sh
+
+  cli:
+    desc: "CLI"
+    cmds:
+     - uv run ipython --ipython-dir=.
+
   go:
+    requires:
+      vars: [_dir_]
+    env:
+      DIR:
+        sh: opspath "{{._dir_}}" 
     desc: "Finetune"
     cmds:
-     - uv run -m finetune qagen "{{._jsondocs_}}"
+     - task: setup
+     - uv run go.py "$DIR"
+     - uv run llama.cpp/convert_hf_to_gguf.py "$DIR/merged_model" --outfile "$DIR.model"
 
+  reset:
+    desc: "Reset"
+    cmds:
+     - rm -Rvf .venv .python-version .venv pyproject.toml
+
+  setup:
+    desc: setup
+    vars:
+      LLAMACPP: b5873
+      ARCH: '{{ARCH}}'
+    status:
+    - ! test -d .venv
+    cmds:
+    - |
+      uv init --python 3.11
+      uv python install
+      uv venv
+      uv pip install torch==2.6.0
+      uv pip install --no-deps bitsandbytes accelerate  peft trl triton cut_cross_entropy unsloth_zoo
+      uv pip install --no-deps xformers==0.0.29.post3
+      uv pip install sentencepiece protobuf "datasets>=3.4.1,<4.0.0" huggingface_hub hf_transfer
+      uv pip install setuptools psutil regex transformers Pillow python-dotenv pip
+      uv pip install --no-deps unsloth
+      uv pip install ipython
+    #- >
+    #  sudo apt-get update && 
+    #  sudo apt-get install pciutils build-essential cmake curl libcurl4-openssl-dev cuda cuda-toolkit -y
+    #- |
+    - git clone https://github.com/ggerganov/llama.cpp
+    - wget https://github.com/ggml-org/llama.cpp/releases/download/b5873/llama-b5873-bin-ubuntu-x64.zip
+    - unzip -j -o llama-b5873-bin-ubuntu-x64.zip  -d llama.cpp
+
+  
+  
