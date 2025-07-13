@@ -16,11 +16,17 @@ tasks:
       vars: [_dir_]
     env:
       DIR:
-        sh: opspath "{{._dir_}}" 
+        sh: opspath "{{._dir_}}"
+      MODEL: "{{base ._dir_}}"
+      TAG:
+        sh: date +%Y.%m%d.%H%M
+    status:
+    - ! test -d .venv
     desc: "Finetune"
     cmds:
      - task: setup
      - uv run finetune.py "$DIR"
+     - ollama create $MODEL:$TAG -f "${DIR}_out/Modelfile"
 
   load:
     desc: "Finetune"
@@ -33,7 +39,7 @@ tasks:
     cmds:
      - |
        uv run llama.cpp/convert_hf_to_gguf.py "${DIR}_out" --outfile "${DIR}_out/model.gguf"
-       ollama create $MODEL -f "$DIR/model_ollama/Modelfile"
+       ollama create $MODEL:$TAG -f "${DIR}_out/Modelfile"
 
   reset:
     desc: "Reset"

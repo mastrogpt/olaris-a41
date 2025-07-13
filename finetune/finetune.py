@@ -16,6 +16,8 @@ from trl import SFTConfig, SFTTrainer
 
 from pathlib import Path
 
+model_name = "unsloth/Meta-Llama-3.1-8B-Instruct"
+
 def load(folder, tokenizer):
 
     dataset = load_dataset("json", data_files=f"{folder}/*", split="train")
@@ -25,6 +27,7 @@ def load(folder, tokenizer):
         return {"text": text}
 
     dataset = dataset.map(to_chatml, remove_columns=["messages"])
+    return dataset
 
 def train(folder, model_name):
 
@@ -35,9 +38,6 @@ def train(folder, model_name):
         load_in_4bit = True,
         # token = "hf_...", # use one if using gated models like meta-llama/Llama-2-7b-hf
     )
-    #tokenizer = get_chat_template(tokenizer, chat_template)
-    dataset = load(folder, tokenizer)
-    #print(tokenizer.chat_template)
 
     model = FastLanguageModel.get_peft_model(
         model,
@@ -52,6 +52,11 @@ def train(folder, model_name):
         use_rslora = False,  # We support rank stabilized LoRA
         loftq_config = None, # And LoftQ
     )
+
+
+    #tokenizer = get_chat_template(tokenizer, chat_template)
+    dataset = load(folder, tokenizer)
+    #print(tokenizer.chat_template)
 
     trainer = SFTTrainer(
         model = model,
@@ -87,7 +92,6 @@ def train(folder, model_name):
     Path(f"{folderout}/Modelfile").write_text(f"FROM {gguf}\n")
 
 def main(argv):
-    model_name = "unsloth/Meta-Llama-3.1-8B-Instruct"
 
     args = sys.argv[1:]
     if len(argv) == 0:
