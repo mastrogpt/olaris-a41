@@ -1,0 +1,4 @@
+html-sanitizer==2.6.0
+
+pytesseract
+pdf2image

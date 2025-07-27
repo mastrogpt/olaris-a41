@@ -1,9 +1,9 @@
 version: 3
 
 tasks:
-  
-  # scrvimi qualcosa qui ->hello openserverless <-
+
   cli:
+    silent: true
     desc: cli
     env:
       IPYTHONDIR:
@@ -11,11 +11,21 @@ tasks:
     dir: cli
     cmds:
       - |
+        if ! test -d .venv
+        then uv venv
+             uv pip install -r requirements.in
+        fi
+      - |
         set -a
         test -e $OPS_PWD/.env && source $OPS_PWD/.env
         test -e $OPS_PWD/tests/.env && source $OPS_PWD/tests/.env
-        uv run ipython
-
+        export PYTHONPATH="$OPS_PWD/packages:$PWD:$PYTHONPATH"
+        cat $OPS_PWD/packages/*/*/requirements.txt >requirements.txt
+        uv pip install -r requirements.txt 
+        if test -z "{{._function_}}"
+        then uv run ipython
+        else uv run ipython -m '{{._function_ | replace  "/" "."}}'
+        fi
 
   new:
     silent: true

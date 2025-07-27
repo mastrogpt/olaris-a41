@@ -7,7 +7,7 @@ AI tasks to manage Agent41
 ```text
 Usage:
   a41 new <action>
-  a41 cli
+  a41 cli [<function>]
   a41 pg
   a41 imp
   a41 finetune
