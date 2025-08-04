@@ -27,6 +27,7 @@ tasks:
         else uv run ipython -m '{{._function_ | replace  "/" "."}}'
         fi
 
+
   new:
     silent: true
     desc: generate a new python action

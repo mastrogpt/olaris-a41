@@ -1,4 +1,6 @@
 #print("hello")
+%load_ext autoreload
+%autoreload 2
 import os
 dir = os.getenv("OPS_PWD")
 if dir:
