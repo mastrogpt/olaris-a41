@@ -10,3 +10,5 @@ cli/profile_default/history.sqlite
 cli/profile_default/db/
 node_modules
 mcp/mcproxy/kubernetes/_*.yaml
+.task/
+_dockerfile

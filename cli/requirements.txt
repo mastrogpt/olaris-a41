@@ -1,8 +1,0 @@
-html-sanitizer==2.6.0
-
-#Dockerfile:RUN apt-get update && apt-get -y install tesseract-ocr 
-pdf2image
-pytesseract
-#Dockerfile:RUN apt-get update && apt-get -y install tesseract-ocr 
-pdf2image
-pytesseract

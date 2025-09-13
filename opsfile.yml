@@ -1,9 +1,24 @@
 version: 3
 
+dotenv:
+  - '{{.OPS_PWD}}/.env'
+
 tasks:
 
+  pg:
+    desc: postgres 
+    
+  etc:
+    desc: miscellaneous 
+
+  mcp:
+    desc: mcp
+
+  imp:
+    desc: imp
+
   cli:
-    silent: true
+    silent: false
     desc: cli
     env:
       IPYTHONDIR:
@@ -20,13 +35,12 @@ tasks:
         test -e $OPS_PWD/.env && source $OPS_PWD/.env
         test -e $OPS_PWD/tests/.env && source $OPS_PWD/tests/.env
         export PYTHONPATH="$OPS_PWD/packages:$PWD:$PYTHONPATH"
-        cat $OPS_PWD/packages/*/*/requirements.txt >requirements.txt
+        cat $OPS_PWD/requirements.txt $OPS_PWD/packages/*/*/requirements.txt >requirements.txt || true
         uv pip install -r requirements.txt 
         if test -z "{{._function_}}"
         then uv run ipython
         else uv run ipython -m '{{._function_ | replace  "/" "."}}'
         fi
-
 
   new:
     silent: true
@@ -82,15 +96,76 @@ tasks:
           assert res.get("output") == "$ACTION"
       EOF
 
+  img:
+    silent: true
+    desc: build image
+    vars:
+      DIR: '{{.OPS_PWD}}/packages/{{._action_}}'
+    env:
+      NO_COLOR: "1"
+    cmds:
+    - |
+      if {{._f}}
+      then rm -f {{.DIR}}/Dockerfile
+      fi
+    - task: _img
+      vars:
+        DIR: '{{.DIR}}'
+    - |
+      if test -e "{{.DIR}}/Dockerfile"
+      then 
+        echo "Image Built. Metadata comment to use:"
+        rg -N -- '--docker' "{{.DIR}}/Dockerfile"
+      fi
 
-  pg:
-    desc: postgres 
-    
-  etc:
-    desc: miscellaneous 
+  _img:
+    silent: true
+    desc: build image
+    sources:
+    - "{{.DIR}}/pyproject.toml"
+    generates:
+    - "{{.DIR}}/Dockerfile"
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - test -n "$DOCKER_BUILDER" || die "create a docker builder in docker cloud and add to .env DOCKER_BUILDER"
+    - test -n "$DOCKER_CUSTOM_RUNTIMES" || die "set DOCKER_CUSTOM_RUNTIMES to the custom runtime prefix"
+    - |
+      if test -f "{{.DIR}}/pyproject.toml"
+      then
+          DIR="{{.DIR}}"
+          SHA="$(sha256sum "$DIR/pyproject.toml" | awk '{print substr($1, 0, 12)}')"
+          KIND="$(awk '/--kind/ {print $2}' "$DIR/__main__.py")"
+          FROM_TAG="$(bun findimg.js "$KIND" "$OPS_ROOT/runtimes.json")"
+          FROM="${FROM_TAG%|*}"
+          TAG="${FROM_TAG#*|}.${SHA}"
+          #echo FROM=$FROM
+          #echo TAG=$TAG
+          if rg "$TAG" "{{.DIR}}/Dockerfile" >/dev/null
+          then echo Image already built
+          else
+            # prepare the dockerfile
+            cat <<EOF >"$DIR/Dockerfile"
+      #--docker "$DOCKER_CUSTOM_RUNTIMES:$TAG"
+      FROM $FROM
+      USER root
+      ADD pyproject.toml pyproject.toml
+      RUN pip3 install .
+      EOF
+            if rg '^#Dockerfile:\s*(.*)' -or '$1' "$DIR/pyproject.toml" >_dockerfile
+            then cat _dockerfile >>"$DIR/Dockerfile"
+            fi
+            echo "USER nobody" >>"$DIR/Dockerfile"
+            cat "$DIR/Dockerfile"
+            docker buildx build --platform linux/arm64,linux/amd64 --builder "$DOCKER_BUILDER" -t "$DOCKER_CUSTOM_RUNTIMES:$TAG" "$DIR" --push
+            if test $? -eq 0
+            then echo Built "$DOCKER_CUSTOM_RUNTIMES:$TAG"
+            else  rm "$DIR/Dockerfile"
+                  die "docker build failed, check the Dockerfile"
+            fi
+          fi
+      else
+        echo "no pyproject.toml found, skipping image build"
+      fi
 
-  mcp:
-    desc: mcp
 
-  imp:
-    desc: imp
+

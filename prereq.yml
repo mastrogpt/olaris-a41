@@ -46,14 +46,6 @@ tasks:
         FILE: "{{.FILE}}"
         OUT: himalaya
   
-  claude:
-    desc: claude code
-    vars:
-      VERSION: "0.2.74"
-    cmds:
-    - bun install -g @anthropic-ai/claude-code@{{.VERSION}}
-    - echo -e '#!/bin/bash\nexec $HOME/.bun/bin/claude "$@"\n' > claude
-    - executable claude
 
   all:
     - task: himalaya
