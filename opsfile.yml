@@ -20,6 +20,8 @@ tasks:
   sv:
     desc: sv
 
+  ai:
+    desc: ai utils
 
   cli:
     silent: false

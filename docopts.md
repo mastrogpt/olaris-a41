@@ -13,4 +13,5 @@ Usage:
   a41 sv
   a41 imp
   a41 finetune
+  a41 ai
 ```

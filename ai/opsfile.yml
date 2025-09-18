@@ -1,0 +1,54 @@
+version: 3
+
+tasks:
+  
+  chat:
+    desc: chat with the AI (LLama3)
+    silent: true
+    cmds:
+    - |
+      set -a
+      test -e $OPS_PWD/.env && source $OPS_PWD/.env
+      args={{._args_}}
+      set -- ${args[@]}
+      test "$1" = "--" && shift
+      python chat.py {{._action_}} "$@"
+
+  stream:
+    silent: true
+    desc: stream an action
+    cmds:
+      - |
+        args={{._args_}}
+        set -- ${args[@]}
+        test "$1" = "--" && shift
+        python stream.py {{._action_}} "$@"
+
+  loader:
+    silent: true
+    desc: export a pdf to text
+    cmds:
+     - |
+       if {{.__clean}}
+       then ops invoke {{.__action}} -p "input" '!!{{.__collection}}' | jq -r .body.output
+       fi
+     - |
+        args={{._file_}} 
+        set -- ${args[@]}
+        script="$(realpath loader.py)"
+        cd $OPS_PWD
+        #if test -z {{.__action}}
+        #then python "$script" - {{.__pages}} "$@"
+        #else python "$script" {{.__action}} {{.__pages}} "$@"
+        #fi
+        python "$script" {{default "-" .__action}} {{default "4000" .__chunksize}} {{default "default" .__collection}} "{{.__opts}}" "$@"
+
+  run:
+    silent: false
+    cmds:
+    - |
+      args={{._args_}} 
+      set -- ${args[@]}
+      cd $OPS_PWD
+      python "{{._script_}}" "$@"
+
