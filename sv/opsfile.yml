@@ -1,0 +1,11 @@
+version: '3'
+
+tasks:
+
+  setup:
+    desc: convert a sveltekit project into a nuvlaris projects
+    cmds:
+    - mkdir -p "$OPS_PWD/packages"
+    - uv run setup.py
+    - cp CLAUDE.md $OPS_PWD/packages/CLAUDE.md
+    - cp workspace.code-workspace $OPS_PWD/workspace.code-workspace

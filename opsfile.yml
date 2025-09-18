@@ -17,6 +17,10 @@ tasks:
   imp:
     desc: imp
 
+  sv:
+    desc: sv
+
+
   cli:
     silent: false
     desc: cli
