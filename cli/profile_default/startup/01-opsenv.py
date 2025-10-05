@@ -19,3 +19,6 @@ if os.path.exists(os.path.expanduser("~/.wskprops")):
 # override with testenv
 load_dotenv(".env")
 load_dotenv("tests/.env", override=True)
+
+class Empty: pass
+self = Empty()
