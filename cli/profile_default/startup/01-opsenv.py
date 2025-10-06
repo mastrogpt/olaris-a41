@@ -22,3 +22,4 @@ load_dotenv("tests/.env", override=True)
 
 class Empty: pass
 self = Empty()
+args = {}
